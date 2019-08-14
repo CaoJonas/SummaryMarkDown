@@ -2,6 +2,8 @@
 
 ## 接口：
 
+==**接口中的域必须是public static final ,抽象方法必须为 public abstract 修饰**。**由于接口代表着一个对外行为的集合，所以任何方法在接口内都是public(公开的)**。==
+
 #### 域（默认public static final）
 
 > 可以包含 基本数据类型 和 引用类型，都必须在声明时 初始化。（public static final 可以省略，一般用作常量（全部大写MAX_VALUE））
@@ -49,7 +51,7 @@ public interface Building<E> {
     }
 ```
 
-#### public abstract 普通方法（）
+#### public abstract 普通方法（）(不能被 protected 修饰)
 
 > 接口中的方法默认为 public abstract 修饰符的，下面两种书写方式都可以。只能是 public abstract
 
@@ -164,11 +166,13 @@ public  static final void printInfo() {
 
 - 接口可以继承多个 接口和类（必须用关键字 extends ,不要用implement, 并且，类无论是抽象类还是具体实现类）
 
+- 抽象类中抽象方法修饰符可以 protected 和 public(缺省为 public), 但是接口中的抽象方法只能是 public abstract(已缺省， 所以无序添加)
+
   ```java
   Interface: Interface1, Interface2;
   Class Building
   public interface Interface3 extends Building,Interface1,Interface2{
-      void canDance();
+      （public abstract）void canDance();
   }
   //  接口可以继承多各类和多个接口
   ```
