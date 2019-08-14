@@ -1278,13 +1278,13 @@ $('#b8').click(function () {
 
   - Ajax
 
-    ![](C:\Users\Bourne\Desktop\markdown导出包\Ajax.jpg)
+    ![](ssm_ack_imgs/Ajax.jpg)
 
   
 
   - Form
 
-    ![](C:\Users\Bourne\Desktop\markdown导出包\Form.jpg)
+    ![](ssm_ack_imgs/Form.jpg)
 
 
 

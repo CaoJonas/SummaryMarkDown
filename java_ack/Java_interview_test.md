@@ -16,7 +16,7 @@
 
 double - float - long - int
 
-![](markdown_md_image/data_type_transfer.jpg)
+![](java_ack_imgs/data_type_transfer.jpg)
 
 所以float的取值范围是-2^128到2^128，远远大于long的最大值。 
 
@@ -84,7 +84,7 @@ animal.printName();
 
 #### Run-Time Data Areas（运行时数据区域）
 
-![](markdown_md_image/run_time_data_area.png)
+![](java_ack_imgs/run_time_data_area.png)
 
 | area          | 作用域                                         | 生命周期                                                     |
 | ------------- | ---------------------------------------------- | ------------------------------------------------------------ |

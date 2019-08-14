@@ -741,8 +741,6 @@ mapper 映射文件中
 
 <font style="color: red;">[mybatis 缓存原理详情](https://www.cnblogs.com/yuluoxingkong/p/8205858.html)</font>
 
-![](C:\Users\Bourne\Desktop\Snipaste_2019-04-11_15-37-27.jpg)
-
 ```java
 @Test
 public void findTwoSessionCache() {

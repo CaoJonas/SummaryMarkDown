@@ -21,7 +21,7 @@
 
    @Repository、@Service、@Controller是@Component的别名
 
-  ![](C:\Users\Bourne\Desktop\markdown导出包\20180908080252982.jpg)
+  ![](ssm_ack_imgs/usual_annotation.jpg)
 
 ```dockerfile
 Spring 2.5 中除了提供 @Component 注释外，还定义了几个拥有特殊语义的注释，它们分别是：@Repository、@Service 和 @Controller。
@@ -33,8 +33,6 @@ Spring 2.5 中除了提供 @Component 注释外，还定义了几个拥有特殊
 @Repository用于标注数据访问组件，即DAO组件
 @Component泛指组件，当组件不好归类的时候，我们可以使用这个注解进行标注。
 ```
-
-
 
 #### 测试用例
 
@@ -299,10 +297,6 @@ Beans:
 #### 设置组件基础扫描包 
 
 @ComponentScan 默认扫描 配置类 所属包中的任意类，AppConfig1 属于service 包， 也就是说 会扫描service 下的所有包 以及service 包下的子包中的类， 所以我们就需要设置默认扫描包
-
-![Snipaste_2019-05-01_18-21-28](C:\Users\Bourne\Desktop\Snipaste_2019-05-01_18-21-28.jpg)
-
-
 
 - 自动扫描包(可以有多个)
 
