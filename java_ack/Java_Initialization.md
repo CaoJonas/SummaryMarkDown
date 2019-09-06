@@ -234,5 +234,3 @@ public class SynChronizedClass {
 /*
 SynChronizedClass{id=1000, name='CaoBourne1'}
 */
-```
-
