@@ -234,3 +234,110 @@ public class SynChronizedClass {
 /*
 SynChronizedClass{id=1000, name='CaoBourne1'}
 */
+```
+
+## 调用其他类的静态方法中间的初始化
+
+》==只会初始化 其中的类变量 和 静态代码块==
+
+```java
+class PersonRe {
+     public final static String name = "CaoBourne";
+     public static String name2 = "CaoBourne2";
+     Kid kid1 = new Kid("Bourne");
+     static{
+          System.out.println("这是 PersonRe 静态方法");
+     }
+     {
+          System.out.println("这是 PersonRe 非静态方法");
+     }
+     static Kid kid2 = new Kid("Jonas");
+
+     public static void printInfo() {
+          System.out.println("PersonRe 类");
+     }
+}
+public class Person {
+     public static void main(String[] args) {
+          PersonRe.printInfo();
+     }
+}
+/*
+只会初始化 其中的类变量 和 静态代码块
+这是 PersonRe 静态方法
+JonasKid 类
+PersonRe 类
+*/
+```
+
+## 调用其他类的静态变量
+
+> ==只会调用 静态代码块 和 初始化静态成员变量==
+
+```java
+class PersonRe {
+     public final static String name = "CaoBourne";
+     public static String name2 = "CaoBourne2";
+     Kid kid1 = new Kid("Bourne");
+     static Kid kid2 = new Kid("Jonas");
+     static Kid kid3 = new Kid("Jonas2");
+     static{
+          System.out.println("这是 PersonRe 静态代码块");
+     }
+     {
+          System.out.println("这是 PersonRe 非静态方法");
+     }
+     public static void printInfo() {
+          System.out.println("PersonRe 类");
+     }
+}
+public class Person {
+     public static void main(String[] args) {
+          System.out.println(PersonRe.kid2);
+     }
+}
+/*
+JonasKid 类
+Jonas2Kid 类
+这是 PersonRe 静态代码块
+com.bourne.practice.pojo.Kid@4554617c
+*/
+```
+
+## 调用静态常量
+
+> 调用静态常量 例如： name 只会初始化 name, 不会初始化静态代码块， 和静态成员变量。。
+
+```java
+class PersonRe {
+
+     public final static String name = "CaoBourne";
+
+     public static String name2 = "CaoBourne2";
+
+     Kid kid1 = new Kid("Bourne");
+     static Kid kid2 = new Kid("Jonas");
+     static Kid kid3 = new Kid("Jonas2");
+
+     static{
+          System.out.println("这是 PersonRe 静态代码块");
+     }
+
+     {
+          System.out.println("这是 PersonRe 非静态方法");
+     }
+
+
+     public static void printInfo() {
+          System.out.println("PersonRe 类");
+     }
+}
+
+public class Person {
+
+     public static void main(String[] args) {
+          System.out.println(PersonRe.name);
+     }
+
+}
+```
