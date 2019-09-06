@@ -108,7 +108,7 @@ User Kid1Kid 类
 >
 > 父类静态代码块和父类静态成员（谁前谁先）
 >
-> 子类静态代码块和父类静态成员（谁前谁先）
+> 子类静态代码块和子类静态成员（谁前谁先）
 >
 > 父类非静态代码块和父类非静态成员（谁前谁先）
 >
@@ -190,3 +190,47 @@ Animal 构造函数Animal2
 ```
 
 > 可以看出静态成员和静态代码块只初始化一次（java 虚拟机加载类时，就会执行该代码），非静态可以初始化多次（每次 new 才会执行代码）
+
+## 自己类中定义自己的实例对象
+
+> 一般在自己类中定义的成员变量一般为 静态成员变量， 如果按照下面定义, 就会出现死循环， 栈内存溢出
+>
+> ```java
+> SynChronizedClass synChronizedClass1 = new SynChronizedClass(1000, "CaoBourne1");
+> public static void main(String[] args){
+>      new SynChronizedClass();
+> }
+> ```
+
+```java
+public class SynChronizedClass {
+
+     private Integer id;
+     private String name;
+
+     public SynChronizedClass() {
+          System.out.println("构造方法");
+     }
+
+     public SynChronizedClass(Integer id, String name) {
+          this.id = id;
+          this.name = name;
+     }
+
+     static SynChronizedClass synChronizedClass1 = new SynChronizedClass(1000, "CaoBourne1");
+
+     @Override
+     public String toString() {
+          return "SynChronizedClass{" +
+               "id=" + id +
+               ", name='" + name + '\'' +
+               '}';
+     }
+
+     public static void main(String[] args){
+          System.out.println(synChronizedClass1);
+     }
+}
+/*
+SynChronizedClass{id=1000, name='CaoBourne1'}
+*/
