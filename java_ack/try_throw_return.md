@@ -212,3 +212,31 @@ finally block
 */
 ```
 
+**如果try 中包含其他 异常处理块， 也有return**
+
+> 无论如何都会执行到 finally, 例如，下面的例子中， 执行完 1-》2-》3-》4， 因为在 4 出需要返回值， number = 30;
+>
+> 如果在 4 处没有return, 那么会返回 number = 70
+
+```java
+public static int getNum() {
+
+     int number = 10;
+
+     try {
+          number = 20;		// 1
+          try {
+               number = 500;		// 2
+          } catch (Exception e) {
+               e.printStackTrace();	
+          } finally {
+               return number = 70;		// 3
+          }
+     } catch (Exception e) {
+          e.printStackTrace();
+     } finally {
+          return number = 30;		// 4
+     }
+}
+```
+
