@@ -93,6 +93,69 @@ public static Node<Integer> buildNode2(int[] nums) {
 }
 ```
 
+> 这儿是顺序创建二叉树， 并且数组中的元素为基本数据类型对应的封装类型， 所以， 元素可以 为 null, 如果，父元素为null, 则子元素在数组中也为 null
+>
+> Integer[] nums = {4, 2, null, 3, 6, null, null, 5, null, 7, 9};
+>
+> [	4]
+> [	2]
+> [	3	6]
+> [	5	7	9]
+>
+> 思想： 
+>
+> 1- 如果 数组的长度为 0， 或者是 数组的第一个元素 为 null， 都说明 该 二叉树 为 空
+>
+> 2-使用队列
+>
+> 3-创建二叉树， 实际遍历  nums.length / 2个元素即可。
+>
+> 4-每次循环， 弹出元素， （这里并没有判断 当前结点为 null还是非null）
+>
+> 5-查看当前元素对应的左孩子的下标 是否越界， 如果不越界， 说明 左孩子存在， 如果左孩子下标对应的元素 为null, （要知道 ， 在创建结点的时候， 左右结点都为 空）， 进入 队列， 如果非空， 则创建 新节点， 成为当前结点的左子树。有孩子同理。
+
+```java
+public static Node<Integer> buildTree4(Integer []nums) {
+     
+     if(nums.length == 0 || nums[0] == null) { // 如果 数组的长度为 0， 或者是 数组的第一个元素 为 null， 都说明 该 二叉树 为 空
+          return null;
+     }
+
+     LinkedList<Node<Integer>> queue = new LinkedList<>();
+     Node<Integer> rootNode = new Node<>(nums[0]);
+     queue.addLast(rootNode);
+     
+     for(int i = 0; i < nums.length / 2; i++) {
+          Node<Integer> currNode = queue.pollFirst();
+          
+          if(i * 2 + 1 < nums.length) {
+               Node<Integer> newNode = null;
+               if(nums[i * 2 + 1] != null) {
+                    newNode = new Node<>(nums[i * 2 + 1]);
+                    currNode.lChild = newNode;
+               }
+               queue.addLast(newNode);
+          }else{
+               break;
+          }
+          
+          if(i * 2 + 2 < nums.length) {
+               Node<Integer> newNode = null;
+               if(nums[i * 2 + 2] != null) {
+                    newNode = new Node<>(nums[i * 2 + 2]);
+                    currNode.rChild = newNode;
+               }
+               queue.addLast(newNode);
+          }else{
+               break;
+          }
+     }
+     
+     return rootNode;
+     
+}
+```
+
 ### 二叉树的后序遍历
 
 #### 1-两个栈
@@ -448,5 +511,168 @@ public int sumOfLeftLeaves(TreeNode root) {
 }
 ```
 
+### 二叉树层级遍历（广度）
 
+#### 1-
+
+> 利用队列，记录每次循环，队列的长度，作为每一层级的循环次数
+
+```java
+public static void levelTraversal(Node<Integer> rootNode) {
+
+     if (rootNode == null) {
+          return;
+     }
+     LinkedList<Node<Integer>> queue = new LinkedList();
+     queue.addLast(rootNode);
+     while (!queue.isEmpty()) {
+          int queueSize = queue.size();
+          System.out.print("[");
+          for (int i = 0; i < queueSize; i++) {
+               Node<Integer> currNode = queue.pollFirst();
+               System.out.print("\t" + currNode.nodeValue);
+               if (currNode.lChild != null) {
+                    queue.addLast(currNode.lChild);
+               }
+               if (currNode.rChild != null) {
+                    queue.addLast(currNode.rChild);
+               }
+          }
+          System.out.println("]");
+     }
+     System.out.println();
+}
+```
+
+#### 2- 螺旋输出 层级二叉树
+
+> 利用ArrayList 集合， 正常遍历， 如果是 奇数层， 就倒数输出， 如果偶数层， 正常输出， 但是必须在 输出完之后，移除上一层级的元素
+>
+> ```java
+> for(int i = 0; i < queueSize; i++) {
+>      queue.remove(0);
+> }
+> ```
+
+```java
+// 螺旋输出 树
+public static void levelTraversal4(Node<Integer> rootNode) {
+     if (rootNode == null) {
+          return;
+     }
+     List<Node<Integer>> queue = new ArrayList<>();
+     queue.add(rootNode);
+     int depthLevel = 1;
+     while (!queue.isEmpty()) {
+          int queueSize = queue.size();
+          System.out.print("[");
+          for (int i = 0; i < queueSize; i++) {
+               Node<Integer> currNode = queue.get(i);
+               if(depthLevel % 2 == 1) {
+                    System.out.print("\t" + queue.get(queueSize - i - 1).nodeValue);
+               }else{
+                    System.out.print("\t" + queue.get(i).nodeValue);
+               }
+               if (currNode.lChild != null) {
+                    queue.add(currNode.lChild);
+               }
+               if (currNode.rChild != null) {
+                    queue.add(currNode.rChild);
+               }
+          }
+          for(int i = 0; i < queueSize; i++) {
+               queue.remove(0);
+          }
+          depthLevel++;
+          System.out.println("]");
+     }
+     System.out.println();
+}
+```
+
+#### 3-层级遍历
+
+> 同样使用队列， 只是不利用循环， 而是在每一层的最后一个位置添加 null, 在每次弹出元素时候，判断是否为 null, 并且 几何中元素不为空， 继续执行，并添加 Null（为 下一层级添加 null）
+>
+> ```java
+> Node<Integer> currNode = queue.pollFirst();
+> if(currNode == null) {
+>      if(!queue.isEmpty()) {
+>           queue.addLast(null);
+>           System.out.println();
+>      }
+> }
+> ```
+
+```java
+// 不用队列
+public static void levelTraversal5(Node<Integer> rootNode) {
+     if (rootNode == null) {
+          return;
+     }
+     LinkedList<Node<Integer>> queue = new LinkedList<>();
+     queue.add(rootNode);
+     queue.add(null);
+     while (!queue.isEmpty()) {
+          Node<Integer> currNode = queue.pollFirst();
+          if(currNode == null) {
+               if(!queue.isEmpty()) {
+                    queue.addLast(null);
+                    System.out.println();
+               }
+          }else{
+               System.out.print(currNode.nodeValue+"\t");
+               if(currNode.lChild != null) {
+                    queue.addLast(currNode.lChild);
+               }
+               if(currNode.rChild != null) {
+                    queue.addLast(currNode.rChild);
+               }
+          }
+     }
+     System.out.println();
+}
+```
+
+### 中序遍历为每个结点添加 next
+
+> 首先创建 一个空结点， 作为第一个结点。返回 firstNode.next 作为链表的开始。
+
+```java
+// 获取中序遍历每个元素的next 结点的指向（像一个结点）
+public static Node<Integer> getNextNode(Node<Integer> rootNode) {
+
+     if(rootNode == null || rootNode.lChild == null && rootNode.rChild == null) {
+          return rootNode;
+     }
+     Node<Integer> beforeNode = new Node<>(-1), firstNode = beforeNode;
+     Stack<Node<Integer>> stack = new Stack<>();
+     Node<Integer> currNode = rootNode;
+     while (currNode != null || !stack.isEmpty()) {
+          if (currNode != null) {
+               stack.push(currNode);
+               currNode = currNode.lChild;
+          } else {
+               currNode = stack.pop();
+               beforeNode.next = currNode;
+               beforeNode = currNode;
+               currNode = currNode.rChild;
+          }
+     }
+     return firstNode.next;
+}
+
+public static void printNode(Node<Integer> firstNode) {
+     Node<Integer> currNode = firstNode;
+     while(currNode != null) {
+          System.out.print(currNode.nodeValue+ " -> ");
+          if(currNode.next != null) {
+               System.out.print(currNode.next.nodeValue+"\n");
+          }else{
+               System.out.print("-1\n");
+          }
+          currNode = currNode.next;
+     }
+}
+```
 
