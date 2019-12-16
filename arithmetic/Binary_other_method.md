@@ -1,5 +1,5 @@
 <center style="font-size: 45px;">二分法</center>
-二分法
+##### 二分法
 
 ```java
 public int binarySearch(int n) {
@@ -20,7 +20,7 @@ public int binarySearch(int n) {
 }
 ```
 
-另类二分法
+##### 另类二分法
 
 ```java
 public static int[] twoSum3(int[] numbers, int target) {
@@ -46,7 +46,7 @@ public static int[] twoSum3(int[] numbers, int target) {
 }
 ```
 
-另类二分法
+##### 另类二分法
 
 > 只是用一次二分法， 如果
 >
@@ -65,6 +65,24 @@ public static int searchInsert(int[] nums, int target) {
           left = mid;
      }
      return  0;
+}
+```
+
+##### 递归二分查找
+
+```java
+public int binarySearch(int[] nums, int low, int high, int findNum) {
+     if (low > high) {
+          return -1;
+     }
+     int mid = low + (high - low) / 2;
+     if (nums[mid] == findNum) {
+          return mid;
+     } else if (nums[mid] < findNum) {
+          return binarySearch(nums, mid + 1, high, findNum);
+     } else {
+          return binarySearch(nums, low, mid - 1, findNum);
+     }
 }
 ```
 
