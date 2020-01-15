@@ -683,6 +683,54 @@ public int trailingZeroes(int n) {
   ```
   
 
+###### [求众数](https://leetcode-cn.com/problems/majority-element/)
+
+> 给定一个大小为 n 的数组，找到其中的众数。众数是指在数组中出现次数大于 ⌊ n/2 ⌋ 的元素。
+>
+> 你可以假设数组是非空的，并且给定的数组总是存在众数。
+>
+> 示例 1:
+>
+> 输入: [3,2,3]
+> 输出: 3
+> 示例 2:
+>
+> 输入: [2,2,1,1,1,2,2]
+> 输出: 2
+
+解法一
+
+```java
+public int majorityElement(int[] nums) {
+     /*
+        记住，这儿不同于    https://leetcode-cn.com/problems/find-mode-in-binary-search-tree/ 在数中找众数， 因为这个是无序的
+        Arrays.sort(nums) // 首先进行排序
+        然后利用每次 获取 数， 比较数的个数。 然后求出 众数
+        */
+     if(nums.length == 0) {
+          return 0;
+     }
+     Arrays.sort(nums);
+     int modeNum = 0;
+     int preNum = nums[0], maxCount = 0, currCount = 0;
+     for(int i = 0; i < nums.length; i++) {
+          if(nums[i] != preNum) {
+               preNum = nums[i];
+               currCount = 1;
+          }else{
+               currCount += 1;
+          }
+          if(maxCount < currCount) {
+               modeNum = nums[i];
+               maxCount = currCount;
+          }
+     }
+     return modeNum;
+}
+```
+
+类似题目：[二叉搜索树中的众数](https://leetcode-cn.com/problems/find-mode-in-binary-search-tree/)
+
 ##### binary-search
 
 ###### Arranging Coins

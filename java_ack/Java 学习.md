@@ -42,6 +42,24 @@
 
    **-c                       对代码进行反汇编**
 
+#### 3-2 利用命令行编译 .java 文件 和 运行 .class 字节码文件*
+
+![](java_ack_imgs/NeteaseSample.jpg)
+
+编译 java.java 文件
+
+```java
+- cd src/main/java
+- javac com/bourne/practice/pojo/Netease.java
+```
+
+==**运行java.class文件**==
+
+```java
+// 好像都需要进入到 main/java文件中进行运行 .class 文件， main/java 是文件夹， 而不是类所处在的包，所以不能连着 main.java一起
+- java com.bourne.practice.pojo.Netease
+```
+
 
 
 #### **4. 如何覆写 equals 方法 和 hashcode 方法**

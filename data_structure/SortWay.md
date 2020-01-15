@@ -210,6 +210,12 @@ public static void quickSortMain(int []nums, int low, int high) {
 
 #### 2路归并排序
 
+> 这里一定要注意的几点：
+>
+> 1. 数组长度为 Nums.length; 而进行排序的下标为 0 - (Nums.length - 1)
+> 2. 在进行归并时， 一定要 start < end(不需要相等)
+> 3. 在最后归并时， 一定要注意： firstStart <= end, 而不是 <
+
 ```java
 public static void merge(int []num, int low, int mid, int high) {
      int []temp = new int[high - low + 1 ];	 // 也可以直接写成 nums.length;一般传过来的数组为 

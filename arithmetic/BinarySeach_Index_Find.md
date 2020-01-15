@@ -127,3 +127,20 @@ public static int binary2(int nums[], int searchNum) {
 }
 ```
 
+3-// 查找小于等于findNum 的数
+
+```java
+// 查找小于等于
+public int binarySearch(int[] nums, int low, int high, int findNum) {
+     if (low > high) {
+          return high;
+     }
+     int mid = low + (high - low) / 2;
+     if (nums[mid] <= findNum) {
+          return binarySearch(nums, mid + 1, high, findNum);
+     } else {
+          return binarySearch(nums, low, mid - 1, findNum);
+     }
+}
+```
+
