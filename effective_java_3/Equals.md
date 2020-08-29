@@ -1,0 +1,471 @@
+# equals
+
+> `要求：`
+>
+> 1. 自反性
+> 2. 对称性
+> 3. 传递性
+> 4. 一致性
+> 5. 非空性
+
+> 很难做到 子类扩展父类的实例域，并且有希望保存父类的 equals 方法
+>
+> `流程`
+>
+> 1. 使用 == 操作符检查是否同一个引用
+> 2. 利用 instanceof 或者 getclass 检查同一个类型
+> 3. 将参数转换成正确的类型
+> 4. 如果，有父类字段，调用父类 equals ，比较类中的域
+>
+> `建议`
+>
+> 1. 非 float 和 double 的基本类型， 利用 == 比较
+> 2. float 和  double 基本类型，利用 Float.compare(a,b) == 0 
+> 3. 引用类型，利用 该类型的equals 方法
+> 4. `如果是数组类型，利用 Arrays.equals(int []a, int []b);  `
+> 5. `如果字段允许有 null ，这个时候可以利用 Object.equals 方法`
+> 6. 域的比较的先后顺序可能会影响性能
+> 7. 如果重写 equals 方法，就必定要重写 hashcode 方法
+>
+> `重中之重`
+>
+> > 一定注意，这里是重写父类方法，而不是重载方法，参数一定要写成 Object 类型
+>
+> ```java
+> @Override
+> public boolean equals(Object obj) {
+>     
+> }
+> ```
+
+## 子类扩展，但只用父类字段比较
+
+```java
+@Override
+public boolean equals(Object obj) {
+    // 1
+    if(this == obj) {
+        return true;
+    }
+    // 2
+    if(!(obj instanceof  Father)) {
+        return false;
+    }
+    // 3
+    Father otherObj = (Father)obj;
+    // 比较
+    return this.name.equals(otherObj.name) && age == otherObj.age;
+}
+```
+
+## 子类扩展，父类和子类字段同时有效
+
+```java
+@Override
+public boolean equals(Object obj) {
+    // 1
+    if(this == obj) {
+        return true;
+    }
+    // 2
+    if(obj == null || obj.getClass() != getClass()) {
+        return false;
+    }
+    // 3
+    Father otherObj = (Father)obj;
+    // 4
+    return name.equals(otherObj.name) && age == otherObj.age;
+}
+```
+
+## Objects.equals()
+
+```java
+public static boolean equals(Object a, Object b) {
+    return (a == b) || (a != null && a.equals(b));
+}
+```
+
+```java
+public static boolean deepEquals(Object a, Object b) {
+    if (a == b)
+        return true;
+    else if (a == null || b == null)
+        return false;
+    else
+        return Arrays.deepEquals0(a, b);
+}
+```
+
+## Arrays.equals(int [], int [])
+
+> 1. 首先判断是不是同一个引用
+>
+> 2. 是不是有 null(这儿比较的时候，·`只·有可能有一个 null, 因为上面已经比较了是不是相等)`
+> 3. 比较数组长度
+> 4. 比较里面的每一个元素，有点类似于Objects.equals
+
+```java
+public static boolean equals(Object[] a, Object[] a2) {
+    if (a==a2)
+        return true;
+    if (a==null || a2==null) 
+        return false;
+
+    int length = a.length;
+    if (a2.length != length)
+        return false;
+	
+    for (int i=0; i<length; i++) {
+        Object o1 = a[i];
+        Object o2 = a2[i];
+        if (!(o1==null ? o2==null : o1.equals(o2)))
+            return false;
+    }
+
+    return true;
+}
+```
+
+```java
+public static boolean equals(int[] a, int[] a2) {
+    if (a==a2)
+        return true;
+    if (a==null || a2==null)
+        return false;
+
+    int length = a.length;
+    if (a2.length != length)
+        return false;
+	
+    for (int i=0; i<length; i++)
+        if (a[i] != a2[i])
+            return false;
+
+    return true;
+}
+```
+
+# hashCode
+
+> 重写 equals 就要重写 hashCode,
+>
+> 要求：
+>
+> 1. 对于同一个值，如果状态没有发生修改，返回的hashCode 保持不变
+> 2. 如果两个对象 equals 相等，那么hashCode 必然产生相同的正数结果
+> 3. 如果两个对象的equals 不相等，那么 hashCode 则不一定顶相同
+> 4. 其实就是，equals 相同的对象 hashCode 一定相同，但是euqals 不相同的， hashCode 只是有可能相同
+>
+> 建议：
+>
+> 1. 首先定义 整形散列码
+>
+> 2. 如果是基本类型，则调用 Type.hashCode, 获取散列码
+>
+> 3. 如果是引用类型，递归调用 引用类型.hashCode 
+>
+> 4. 如果是数组，利用Arrays.hashCode()
+>
+> 5. 如果有对象为 null, 就可以利用 Objects.hash(元素)
+>
+>    ```java
+>    // Objects  -- 一个对象
+>    public static int hashCode(Object o) {
+>        return o != null ? o.hashCode() : 0;
+>    }
+>    ```
+>
+>    ```java
+>    // Objects -- 多个对象
+>    public static int hash(Object... values) {
+>        return Arrays.hashCode(values);
+>    }
+>    ```
+>    
+>    ```java
+>    @Override
+>    public int hashCode() {
+>        int result = Objects.hash(name, age, dog) ;
+>        result = 31 * result + Arrays.hashCode(hobbies);
+>        return result;
+>    }
+>    ```
+
+## 样例
+
+```java
+// 数组的
+@Override
+public int hashCode() {
+    int result = Arrays.hashCode(hobbies);
+    result = 31 * result + Arrays.hashCode(everyStageHonor);
+    return result;
+}
+```
+
+```java
+// 普通成员
+@Override
+public int hashCode() {
+    return Objects.hash(name, age);
+}
+```
+
+# toString()
+
+> sdfs
+
+如果一个类被定义为 final, 这时候可以写成
+
+```java
+@Override
+public String toString() {
+    return "Person { "+
+            "salary=" + salary + '}';
+}
+```
+
+但是，如果当前类被子类继承，应该书写 
+
+```java
+@Override // fulei
+public String toString() {
+    return this.getClass().getName() + 
+        "{ name='" + name + '\'' +
+        '}';
+}
+@Override	// 子类
+public String toString() {
+    return super.toString() +
+        "{ salary=" + salary + '}';
+}
+```
+
+如果，当前值 为 null, 就可以
+
+调用 Objects.toString()
+
+> 其实 valueOf 也会调用 对象自定义的 toString(), 如果没有定义，则返回散列码
+
+```java
+public static String toString(Object o) {
+    return String.valueOf(o);
+}
+System.out.println(Objects.toString(null)); // null
+```
+
+同样，如果，是数组，可以调用 Arrays.toString(arr); 其实 这里面也会调用 该类型的 toString
+
+```java
+public static String toString(Object[] a) {
+    if (a == null)
+        return "null";
+
+    int iMax = a.length - 1;
+    if (iMax == -1)
+        return "[]";
+
+    StringBuilder b = new StringBuilder();
+    b.append('[');
+    for (int i = 0; ; i++) {
+        b.append(String.valueOf(a[i]));	// 在这里调用子类定义的 toString
+        if (i == iMax)
+            return b.append(']').toString();
+        b.append(", ");
+    }
+}
+```
+
+# Clone()
+
+## 基本类型
+
+```java
+ @Override
+public Father clone() {
+    Father father = null;
+    try {
+        father = (Father) super.clone();      
+    } catch (CloneNotSupportedException e) {
+        e.printStackTrace();
+    }
+    return father;
+}
+```
+
+## 引用类型
+
+```java
+ @Override
+public Father clone() {
+    Father father = null;
+    try {
+        father = (Father) super.clone();
+        father.dog = father.dog.clone();
+    } catch (CloneNotSupportedException e) {
+        e.printStackTrace();
+    }
+    return father;
+}
+```
+
+## 数组类型（引用和基本类型）
+
+```java
+@Override
+public Father clone() {
+    Father father = null;
+    try {
+        father = (Father) super.clone();
+        father.dog = father.dog.clone();
+        father.hobbies = father.hobbies.clone(); // 字符串数组
+        father.salary = father.salary.clone();// 整形数组
+    } catch (CloneNotSupportedException e) {
+        e.printStackTrace();
+    }
+    return father;
+}
+```
+
+## 深copy and 浅copy
+
+> 如果，只是单纯的基本类型， clone之后的对象 修改不会相互影响，但是，引用类型 的修改会相互影响，因为 clone 只是实现了 浅 copy ; 
+>
+> 浅  copy ：  基本类型： 复制；  引用类型： 同一引用
+>
+> 深  copy :    基本类型 复制； 引用类型，重新 分配内存，不会相互影响。
+
+###  浅 copy
+
+```java
+class Outer implements Cloneable {
+
+    private int num;
+    private String name;
+
+    private int []arr;
+
+    public int[] getArr() {
+        return arr;
+    }
+
+    public void setArr(int[] arr) {
+        this.arr = arr;
+    }
+
+    public Outer() {
+        super();
+    }
+
+    public int getNum() {
+        return num;
+    }
+
+    public void setNum(int num) {
+        this.num = num;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Outer(int num, String name) {
+        this.num = num;
+        this.name = name;
+        System.out.println("调用了构造方法");
+    }
+
+    public Outer(int num, String name, int[] arr) {
+        this(num, name);
+        this.arr = arr;
+    }
+
+    @Override
+    protected Object clone() {
+        Outer outer = null;
+        try {
+            outer = (Outer)super.clone();
+            // outer.arr = outer.arr.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return outer;
+    }
+
+    @Override
+    public String toString() {
+        return "Outer{" +
+            "num=" + num +
+            ", name='" + name + '\'' +
+            ", arr=" + Arrays.toString(arr) +
+            '}';
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+        int []nums = new int[]{1, 3, 5,4, 7, 10, 13};
+        Outer outer = new Outer(26, "CaoBourne", nums );
+        Outer clone = (Outer) outer.clone();
+
+        clone.setName("caobourne");
+        nums[0] = 300;
+
+        System.out.println(outer);
+        System.out.println(clone);
+    }
+}
+/*
+调用了构造方法
+Outer{num=26, name='CaoBourne', arr=[300, 3, 5, 4, 7, 10, 13]}
+Outer{num=26, name='caobourne', arr=[300, 3, 5, 4, 7, 10, 13]}
+*/
+```
+
+### 深 copy
+
+> 如果，包含引用类型，必须 专门 clone
+
+```java
+@Override
+protected Object clone() {
+    Outer outer = null;
+    try {
+        outer = (Outer)super.clone();
+        outer.arr = outer.arr.clone();
+    } catch (CloneNotSupportedException e) {
+        e.printStackTrace();
+    }
+    return outer;
+}
+public class Main {
+
+    public static void main(String[] args) {
+        int []nums = new int[]{1, 3, 5,4, 7, 10, 13};
+        Outer outer = new Outer(26, "CaoBourne", nums );
+        Outer clone = (Outer) outer.clone();
+
+        clone.setName("caobourne");
+        nums[0] = 300;
+
+        System.out.println(outer);
+        System.out.println(clone);
+    }
+}
+/*
+调用了构造方法
+Outer{num=26, name='CaoBourne', arr=[300, 3, 5, 4, 7, 10, 13]}
+Outer{num=26, name='caobourne', arr=[1, 3, 5, 4, 7, 10, 13]}
+*/
+```
+## clone 和 new 的区别
+
+> 二者在内存中开辟新的空间，创建新的对象，不同的是：new 需要调用 构造方法进行初始化，而clone 方法则是将 原先对象的值 copy 到新对象中，但是 copy 是 浅 copy ，引用类型还是和 原先对象 中的 属性指向同一块地址。
+>
+> clone 方法效率更高一些。
