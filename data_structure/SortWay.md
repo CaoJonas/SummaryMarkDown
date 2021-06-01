@@ -81,6 +81,42 @@ public static void bubbleSortIm2(int []nums) {
 }
 ```
 
+#### 选择排序
+
+##### 稳定方法
+
+> 如果，我们每次比较，然后进行交换，就不会改变两个相同位置
+
+```java
+for(int i = 0; i < arr.length - 1; i++) {
+    for(int j = i + 1; j < arr.length; j++) {
+        if(arr[i] > arr[j]) {
+            int temp = arr[j];
+            arr[j] = arr[i];
+            arr[i] = temp;
+        }
+    }
+}
+```
+
+##### 不稳定方法
+
+> 如果找出最小的下标 再交换，就会改变相同数字的位置
+
+```java
+for(int i = 0; i < arr.length - 1; i++) {
+    int minIndex = i;
+    for(int j = i + 1; j < arr.length; j++) {
+        if(arr[minIndex] > arr[j]) {
+            minIndex = j;
+        }
+    }
+    int temp = arr[minIndex];
+    arr[minIndex] = arr[i];
+    arr[i] = temp;
+}
+```
+
 #### 希尔排序
 
 > 希尔排序就是有点类似于 插入排序。第三层内 第 i 个 元素 要和 第 i - h 个元素比较， 如果 i > i - h, 则终止比较， 因为 前 i - h, i - 2h 。。。已经有序。
@@ -129,39 +165,111 @@ public static void insertSort(int []nums) {
 > 这种插入排序比较有意思， 就是每次利用 当前 currValue 和 之前的数比较， 如果小， 则交换， 否则终止， 再循环结束后， nums[j] = currValue.
 
 ```java
-for(int i = 1, j = i; i < nums.length; j = ++i) {
-     int currValue = nums[i];
-     while(currValue < nums[j - 1]) {
-          nums[j] = nums[j - 1];
-          if(--j == 0) {
-               break;
-          }
-     }
-     nums[j] = currValue;
+public void insertSort(int[] arr) {
+    int temp = 0;
+    for(int i = 1; i < arr.length; i++) {
+        temp = arr[i];
+        int j = i - 1;
+        for(; j >= 0 && temp < arr[j]; j--) {  // j >= 0
+            arr[j + 1] = arr[j];
+        }
+        arr[j + 1] = temp;
+    }
+    System.out.println(Arrays.toString(arr));
 }
 ```
 
 > ==这种比较有意思， 就是如果 我的前面一些是有序的， 我就跳过这些， 直接从非有序开始==
 
 ```java
-public static void insertSort2(int []nums) {
+public static void insertSortOp3(int []arr) {
+    if (arr == null || arr.length == 0) {
+        return;
+    }
+    int start = 1;
+    while(start < arr.length && arr[start] > arr[start - 1]) {
+        start++;
+    }
+    for(int i = start; i < arr.length; i++) {
+        int currNum = arr[i], j = i;
+        while(j > 0 && currNum < arr[j - 1]) {
+            arr[j] = arr[j - 1];
+            j--;
+        }
+        arr[j] = currNum;
+    }
+}
+```
 
-     int i = 0;
-     do{
-          if(i >= nums.length) {
-               return;
-          }
-     }while (nums[++i] >= nums[i - 1]);
-     for(int j = i; i < nums.length; j = ++i) {
-          int currValue = nums[i];
-          while(currValue < nums[j - 1]) {
-               nums[j] = nums[j - 1];
-               if(--j == 0) {
-                    break;
-               }
-          }
-          nums[j] = currValue;
-     }
+> 这种方法时利用二分，首先找到 第一个大于 arr[i] 的数字，然后，将数字后移，然后替换
+>
+> 记住，其实这里就是用 二分查找 找出最后一个小于等于 arr[i] 的数字，这个时候， end 指向 大于 nums[i] 的前一个位置，因此，需要end + 1;
+
+```java
+public static void insertSortOptm(int []arr) {
+    long startTime = System.currentTimeMillis();
+    if(arr == null || arr.length <= 1) {
+        return;
+    }
+    for(int i = 1; i < arr.length; i++) {
+        int start = 0, end = i - 1;
+        while (start <= end) {
+            int mid = start + (end - start) / 2;
+            if(arr[mid] <= arr[i]) {
+                start = mid + 1;
+            }else {
+                end = mid - 1;
+            }
+        }
+        int temp = arr[i];
+        for(int n = i; n > end + 1; n--) {
+            arr[n] = arr[n - 1];
+        }
+        arr[end + 1] = temp;
+    }
+    System.out.println(System.currentTimeMillis() - startTime);
+}
+```
+
+#### ==保证奇偶有序==
+
+```java
+public void insertSort(int[] arr, int end) {
+    int temp = arr[end];
+    int j = end - 2;
+    for (; j >= 0 && temp < arr[j]; j -= 2) {
+        arr[j + 2] = arr[j];
+    }
+    arr[j + 2] = temp;
+}
+
+public void insertSortMain(int[] arr) {
+    int evenStart = 0, oddStart = 1;
+    int arrLen = arr.length - 1;
+    int count = 0;
+    while (evenStart <= arrLen && oddStart <= arrLen) {
+        count += 1;
+        int temp = arr[arrLen];
+        if ((temp & 1) == 1) {
+            arr[arrLen] = arr[oddStart];
+            arr[oddStart] = temp;
+            insertSort(arr, oddStart);
+            oddStart += 2;
+        } else {
+            arr[arrLen] = arr[evenStart];
+            arr[evenStart] = temp;
+            insertSort(arr, evenStart);
+            evenStart += 2;
+        }
+    }
+    insertSort(arr, arrLen);
+    System.out.println(Arrays.toString(arr));
+}
+
+public static void main(String[] args) {
+    int[] arr = {100, 10, 1, 5, 7, 3, 10, 8, 12, 2, 11, 3};
+    Practice practice = new Practice();
+    practice.insertSortMain(arr);
 }
 ```
 
@@ -172,6 +280,9 @@ public static void insertSort2(int []nums) {
 > 快速排序的思想就是首先找到一个能把 数组分成两部分的一个关键字 keyNote 的下标（==最好是能评分整个数组为两部分==）然后对 low - (keyNoteIndex  - 1)和 keyNoteIndex + 1 - high 两部分进行上面的操作，也是一个递归操作。
 >
 > 唯一的退出条件就是 low = high, 所以最后的返回值 low 和 返回 high 相同
+
+1. 快速排序的递归次数与元素的初始排列有关，如果每一次的划分后分区比较平衡，则递归次数比较少。
+2. 快速排序的递归次数与分区处理顺序无关，既先处理较长的分区或先处理较短的分区都不影响递归次数
 
 ```java
 public static void swap(int []nums, int low, int high) { // 交换函数
@@ -197,7 +308,6 @@ public static int quickSort(int []nums, int low, int high) {
      System.out.println(low + " = low\t" + "high = " + high);
      return low;
 }
-
 public static void quickSortMain(int []nums, int low, int high) {
      if(low >= high) {
           return;
@@ -297,20 +407,31 @@ public static void main(String[] args) {
 >   }
 >   ```
 >
->   > 首先做交换， 把 数组第一个元素和当前数组的 堆中最后元素交换， i - 1;
->   >
 >   > i - 1 是因为 创建堆的时候，已经创建好了 最大堆或最小堆， 经过上面的交换， 可以 0 - arrayLength - 2;
->
+>   >
+>   > 虽然建好堆，已经有最大或最小位于根节点，但是我们不交换，为的后面的循环更好写
+> >
+>   > for(int start = arr.length - 1; start >= 0; start --) {
+>   >
+>   > ​	heapSort(arr, 0, start);
+>   >
+>   > }
+> 
 >   ```java
->   for(int i = array.length - 1; i > 0; i--) {	//
->        temp = array[0];
->        array[0] = array[i];
->        array[i] = temp;
->        System.out.println(Arrays.toString(array));
->        heapSortSmall(array, 0, (i - 1));
+>   public static void dumpSortMain(int []array) {
+>       for(int start = array.length / 2 - 1; start >= 0; start --) {
+>         heapSortMax(array, start, array.length - 1);
+>       }
+>       for(int i = array.length - 1; i >= 0; i--) {
+>           heapSortMax(array, 0, i);
+>           int temp = array[0];
+>           array[0] = array[i];
+>           array[i] = temp;
+>       }
+>       System.out.println(Arrays.toString(array));
 >   }
 >   ```
->
+> 
 >   
 
 ##### 最小堆(降序)
@@ -334,20 +455,17 @@ public static void heapSortSmall(int []array, int start, int end) {
      }
 }
 
-public static void heapSortSMain(int []array) {
-
-     int temp;
-     for(int start = array.length / 2 - 1; start >= 0; start --) {
-          heapSortSmall(array, start, array.length - 1);
-     }
-     System.out.println(Arrays.toString(array));
-     for(int i = array.length - 1; i > 0; i--) { 
-          temp = array[0];
-          array[0] = array[i];
-          array[i] = temp;
-          System.out.println(Arrays.toString(array));
-          heapSortSmall(array, 0, (i - 1));
-     }
+public static void dumpSortMain(int []array) {
+    for(int start = array.length / 2 - 1; start >= 0; start --) {
+        heapSortMax(array, start, array.length - 1);
+    }
+    for(int i = array.length - 1; i >= 0; i--) {
+        heapSortMax(array, 0, i);
+        int temp = array[0];
+        array[0] = array[i];
+        array[i] = temp;
+    }
+    System.out.println(Arrays.toString(array));
 }
 ```
 
@@ -363,35 +481,34 @@ public static void heapSortSMain(int []array) {
 ##### 最大堆(升序)
 
 ```java
-public static void heapSortMax(int []array, int start, int end) {
-
-     int temp;
-     int currNode = start;
-     int childIndex = start * 2 + 1;
-     for (;childIndex <= end; currNode = childIndex, childIndex = childIndex * 2 + 1) {
-          if(childIndex < end && array[childIndex] < array[childIndex + 1]) {
-               childIndex += 1;
-          }
-          if(array[currNode] >= array[childIndex]) {
-               break;
-          }else{
-               temp = array[currNode];
-               array[currNode] = array[childIndex];
-               array[childIndex] = temp;
-          }
-     }
+public static void heapSortMax(int []arr, int start, int end) {
+    int currIndex = start;
+    int childIndex = start * 2 + 1;
+    for(; childIndex <= end; currIndex = childIndex, childIndex = childIndex * 2 + 1) {
+        if(childIndex < end && arr[childIndex] < arr[childIndex + 1]) {
+            childIndex += 1;
+        }
+        if(arr[currIndex] < arr[childIndex]) {
+            int temp = arr[childIndex];
+            arr[childIndex] = arr[currIndex];
+            arr[currIndex] = temp;
+        }else{
+            break;
+        }
+    }
 }
 
-public static void heapSortMaxMain(int []array) {
-     int temp;
-     heapSortMax(array, 0, array.length - 1);
-     for(int i = array.length - 1; i > 0; i--) {
-          temp = array[0];
-          array[0] = array[i];
-          array[i] = temp;
-          System.out.println(Arrays.toString(array));
-          heapSortMax(array, 0, i - 1);
-     }
+public static void dumpSortMain(int []array) {
+    for(int start = array.length / 2 - 1; start >= 0; start --) {
+        heapSortMax(array, start, array.length - 1);
+    }
+    for(int i = array.length - 1; i >= 0; i--) {
+        heapSortMax(array, 0, i);
+        int temp = array[0];
+        array[0] = array[i];
+        array[i] = temp;
+    }
+    System.out.println(Arrays.toString(array));
 }
 ```
 
@@ -403,4 +520,80 @@ public static void heapSortMaxMain(int []array) {
 [1, 2, 3, 4, 5, 6, 7]
 [1, 2, 3, 4, 5, 6, 7]
 ```
+
+#### 基数排序
+
+```java
+final static int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999,
+                                99999999, 999999999, Integer.MAX_VALUE};
+final static int[] baseNum = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
+
+// Requires positive x;  计算一个数的位数
+private static int stringSize(int x) {
+    for (int i = 0; ; i++)
+        if (x <= sizeTable[i])
+            return i + 1;
+}
+// 获取数字 第 k 位上面的数字
+private static int getBase(int currNum, int k) {
+    return (currNum / baseNum[k - 1]) % 10;
+}
+
+/**
+    * 基数排序
+    * @param nums
+    */
+public static void baseNum(int[] nums) {
+    // 找出最大值
+    int maxNum = Integer.MIN_VALUE;
+    for(int i = 0; i < nums.length; i++) {
+        if(maxNum < nums[i]) {
+            maxNum = nums[i];
+        }
+    }
+    // 判断最大值的位数
+    int maxLen = stringSize(maxNum);
+    for(int i = 1; i <= maxLen; i++) {
+        int [] count = new int[11];
+        int []tempArr = new int[nums.length];
+        // 统计
+        for(int j = 0; j < nums.length; j++) {
+            // 首先获取 当前位上面的数字
+            count[getBase(nums[j], i) + 1]++;
+        }
+        // 计算索引
+        for(int j = 1; j < count.length; j++) {
+            count[j] = count[j] + count[j - 1];
+        }
+        // 数据分类
+        for(int j = 0; j < nums.length; j++) {
+            tempArr[count[getBase(nums[j], i)]++] = nums[j];
+        }
+        // 回写
+        for(int j = 0; j < nums.length; j++) {
+            nums[j] = tempArr[j];
+        }
+    }
+}
+```
+
+#### 计数排序
+
+> 计数排序可以看成是特殊的桶排序。待排序序列有n个数据元素且数值范围不大，最大值为k，我们可以划分为k个桶，每个桶内的数据元素值相同，节省了桶内排序的时间。
+>
+> 2.2.1 时间复杂度
+>
+> `计数排序的实现过程中，需要遍历两次序列，第一次从前往后划分数据元素，第二次从后往前重新排序，所以计数排序的时间复杂度为O(n)。`
+>
+> 2.2.2 空间复杂度
+>
+> `计数排序过程中，首先需要长度为k+1的数组存储每个数值的元素个数，然后重新排序过程中，需要临时数组存放排序结果，所以计数排序的空间复杂度为O(n)。`
+>
+> 计数排序的实现过程中只有将原序列中数据元素存放到临时数组时会发生位置改变，但是实现使得并不会改变相同元素的相对位置，所以计数排序是稳定的。
+>
+> 2.3 适用场景
+>
+> 1）计数排序适合数据范围不大的场景；
+>
+> 2）计数排序只适合于非负整数排序，如果是其他数据类型，要在不改变其相对大小的情况下，将其转换为非负整数再进行排序。
 

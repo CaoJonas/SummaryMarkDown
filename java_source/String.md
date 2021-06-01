@@ -177,25 +177,6 @@ void getChars(char dst[], int dstBegin) {
 getChars(dst, 10); 也就是 下标从 10 开始， 才被中心赋值
 ```
 
-#### public void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin)
-
-==包内私有方法，把一个字符串的一部分 复制到 dst 数组中， 而且从下标 = dstBegin 出开始复制数组, 复制的整个长度为 srcEnd - srcBegin==
-
-```java
-public void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin) {
-    if (srcBegin < 0) {
-        throw new StringIndexOutOfBoundsException(srcBegin);
-    }
-    if (srcEnd > value.length) {
-        throw new StringIndexOutOfBoundsException(srcEnd);
-    }
-    if (srcBegin > srcEnd) {
-        throw new StringIndexOutOfBoundsException(srcEnd - srcBegin);
-    }
-    System.arraycopy(value, srcBegin, dst, dstBegin, srcEnd - srcBegin);
-}
-```
-
 #### ==compareTo==
 
 ==
@@ -423,7 +404,7 @@ int targetOffset：查找字符串的偏移  默认为 0
 
 int targetCount：查找字符串的长度
 
-int fromIndex：字符串开始的下标
+int fromIndex：从源字符串开始找的下标
 
 ```java
 public int indexOf(String str) { // 
@@ -468,6 +449,15 @@ static int indexOf(char[] source, int sourceOffset, int sourceCount,
                     target.value, 0, target.value.length,
                     fromIndex);
 }
+```
+
+#### indexOf
+
+> 这个其实就是一种实现，还是挺难的
+>
+> ![](java_source_imgs/indexOf_max.jpg)
+
+```java
 /**
  * Code shared by String and StringBuffer to do searches. The
  * source is the character array being searched, and the target
@@ -498,7 +488,7 @@ static int indexOf(char[] source, int sourceOffset, int sourceCount,
      }
 
      char first = target[targetOffset]; // 找出查找字符串的第一个字符
-     int max = sourceOffset + (sourceCount - targetCount);	// 第一个字符串所能比较的下标最大的字符串。  因为 i + target.length() < max + target.length
+     int max = sourceOffset + (sourceCount - targetCount);	// 最后一次比较，第一个字符所能比较的下标。  因为 i + target.length() < max + target.length，详情见上图
 
      for (int i = sourceOffset + fromIndex; i <= max; i++) {
           /* Look for first character. */
@@ -509,15 +499,18 @@ static int indexOf(char[] source, int sourceOffset, int sourceCount,
           if (source[i] != first) {
                while (++i <= max && source[i] != first);
           }
-
+		  // 1. 其实，执行到这一步，要么第一个字符都没有找到，并且，i > max
+         // 2. 第一个字符刚好找到了
           /* Found first character, now look at the rest of v2 */
           if (i <= max) {
                int j = i + 1; // 执行到这一步， 第一个字符一定匹配， 所以从 匹配后的字符串开始
-               int end = j + targetCount - 1;	// 所查找的次数就是 j + targetCount - 1(只比较 targetCount - 1次就够了)
+               int end = j + targetCount - 1;	// 所查找的次数就是 j + targetCount - 1(只比较 targetCount - 1次就够了)  -- 因为，第一个字符已经匹配，之后最多比较的下标
                // 
                for (int k = targetOffset + 1; j < end && source[j]
                     == target[k]; j++, k++);
 			// 这儿就是source[j] == target[k]， 如果比较之后， j == end, 也就是匹配到 该字符串
+              // 其实，如果，sourceOffset == 0, 这个时候直接返回 i 就可以，也可以返回
+              // j - targetCount
                if (j == end) {
                     /* Found whole string. */
                     return i - sourceOffset;
@@ -756,3 +749,261 @@ public String substring(int beginIndex, int endIndex) {
 }
 ```
 
+### `getChar`
+
+> 这个函数还是比较难的，要重复记录
+
+==包内私有方法，把一个字符串的一部分 复制到 dst 数组中， 而且从下标 = dstBegin 出开始复制数组, 复制的整个长度为 srcEnd - srcBegin==
+
+```java
+public void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin) {
+    if (srcBegin < 0) {
+        throw new StringIndexOutOfBoundsException(srcBegin);
+    }
+    if (srcEnd > value.length) {
+        throw new StringIndexOutOfBoundsException(srcEnd);
+    }
+    if (srcBegin > srcEnd) {
+        throw new StringIndexOutOfBoundsException(srcEnd - srcBegin);
+    }
+    System.arraycopy(value, srcBegin, dst, dstBegin, srcEnd - srcBegin);
+}
+```
+
+#### getChars
+
+> 将调用者 复制到 dst， 从 dstBegin 开始，长度为 value.length
+>
+> 从dstBegin开始将字符串中的字符复制到dst中。此方法不执行任何范围检查。
+
+```java
+void getChars(char dst[], int dstBegin) {
+    System.arraycopy(value, 0, dst, dstBegin, value.length);
+}
+```
+
+#### concat
+
+```java
+public String concat(String str) {
+    // 假设调用者为 src
+    // 要拼接的字符串，如果为空，直接返回
+    int otherLen = str.length();
+    if (otherLen == 0) {
+        return this;
+    }
+    // 
+    int len = value.length;
+    // 首先创建新的数组
+    char buf[] = Arrays.copyOf(value, len + otherLen);
+    // getChars 其实就是将 str 拼接到 buf 从 下标 len 开始的位置
+    str.getChars(buf, len);
+	// 这个时候 buf 下标 len 之前存储的调用者src, 下标 len 之后存储的是 str
+    // 下面的构造方法表示 不会创建新的数组。一定要和 new String(String name) 区分开，因为这个会创建新的数组存储 name
+    return new String(buf, true);
+}
+```
+
+#### '+' 和 concat 的区别
+
+> 1. 同样都是连接字符串，但是 '+' 不受参数类型的限制，可以接受 数字、null、对象类型等各种类型的拼接
+>
+>    ```java
+>    name = "CaoXiangbiao";
+>    System.out.println(name + 4); // 
+>    System.out.println(5 + name + 4);
+>    System.out.println(name + null);
+>    System.out.println(3 + 2 + name); // 这个很有意思，就是字符串之前的 '+' 会进行计算，然后再连接
+>    System.out.println(name + 3 + 2); // CaoXiangbiao32,字符串之后出现的被视为字符串的连接
+>    /*
+>    CaoXiangbiao4
+>    5CaoXiangbiao4
+>    CaoXiangbiaonull
+>    5CaoXiangbiao
+>    */
+>    ```
+>
+> 2. concat 只接受字符串类型的参数，并且 str 不能为空
+
+#### '+' 字节码层面
+
+> 我们会发现，使用 StringBuilder 会创建，然后调用两次 append 方法，最后调用 toString 方法，将该对象转化为 String 类型返回，要记住，这种拼接只会在队中创建字符串对象，而不会在字符串常量池中创建对象。
+
+```java
+       String surName = "Cao", firstName = "Xiangbiao";
+	   String name = surName + firstName;       
+	   0: ldc           #2                  // String Cao
+       2: astore_1
+       3: ldc           #3                  // String Xiangbiao
+       5: astore_2
+       6: new           #4                  // class java/lang/StringBuilder
+       9: dup
+      10: invokespecial #5                  // Method java/lang/StringBuilder."<init>":()V
+      13: aload_1
+      14: invokevirtual #6                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljav
+a/lang/StringBuilder;
+      17: aload_2
+      18: invokevirtual #6                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljav
+a/lang/StringBuilder;
+      21: invokevirtual #7                  // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      24: astore_3
+      25: return
+```
+#### contentEquals 和 equals 的区别
+
+> 该方法接受 StringBuffer 和 CharSequence 类型的参数，其实比较的也是两个字符串的内容，`尽管 equals 接收 Object 类型的参数`，但是后续的比较只能为 字符串类型
+
+```java
+/*
+将此字符串与指定的StringBuffer进行比较。当且仅当此String表示与指定StringBuffer相同的字符序列时，结果为true。这个方法在StringBuffer上进行同步。
+*/
+public boolean contentEquals(StringBuffer sb) {
+    return contentEquals((CharSequence)sb);
+}
+private boolean nonSyncContentEquals(AbstractStringBuilder sb) {
+    char v1[] = value;
+    char v2[] = sb.getValue(); // 获取 StringBuilder 中的字符数组 
+    int n = v1.length;
+    if (n != sb.length()) {
+        return false;
+    }
+    for (int i = 0; i < n; i++) {
+        if (v1[i] != v2[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/*
+将此字符串与指定的CharSequence进行比较。当且仅当此String表示与指定序列相同的char值序列时，结果为true。注意，如果CharSequence是一个StringBuffer，那么该方法将对它进行同步。
+*/
+public boolean contentEquals(CharSequence cs) {
+    // Argument is a StringBuffer, StringBuilder
+    if (cs instanceof AbstractStringBuilder) {
+        if (cs instanceof StringBuffer) {
+            synchronized(cs) { // 还是要同步的
+                return nonSyncContentEquals((AbstractStringBuilder)cs);
+            }
+        } else {
+            return nonSyncContentEquals((AbstractStringBuilder)cs);
+        }
+    }
+    // Argument is a String 
+    if (cs instanceof String) {
+        return equals(cs);
+    }
+    // Argument is a generic CharSequence -- 其他类型
+    // {
+    char v1[] = value;
+    int n = v1.length;
+    if (n != cs.length()) {
+        return false;
+    }
+    for (int i = 0; i < n; i++) {
+        if (v1[i] != cs.charAt(i)) {
+            return false;
+        }
+    }
+    // } -- 其实，这儿的操作和 nonSyncContentEquals 还是有些区别的，因为charSequence 有些不是由 字符数组构成
+    return true;
+}
+```
+
+#### regionMatches
+
+> 该方法被重载，一个忽略大小写，一个不忽略大小写
+
+```java
+/*
+将此String对象的子字符串与参数other的子字符串进行比较。如果这些子字符串表示相同的字符序列，则结果为真。要比较的String对象的子字符串从索引tooffset开始，长度为len。要比较的other子字符串从下标offset开始，长度为len。当且仅当下列条件中至少有一个为真时，结果为假
+*/
+public boolean regionMatches(int toffset, String other, int ooffset,
+                             int len) {
+    char ta[] = value;
+    int to = toffset;
+    char pa[] = other.value;
+    int po = ooffset;
+    // Note: toffset, ooffset, or len might be near -1>>>1.
+    if ((ooffset < 0) || (toffset < 0)
+        || (toffset > (long)value.length - len)
+        || (ooffset > (long)other.value.length - len)) {
+        return false;
+    }
+    while (len-- > 0) {
+        if (ta[to++] != pa[po++]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+public boolean regionMatches(boolean ignoreCase, int toffset,
+                             String other, int ooffset, int len) {
+    char ta[] = value;
+    int to = toffset;
+    char pa[] = other.value;
+    int po = ooffset;
+    // Note: toffset, ooffset, or len might be near -1>>>1.
+    if ((ooffset < 0) || (toffset < 0)
+        || (toffset > (long)value.length - len)
+        || (ooffset > (long)other.value.length - len)) {
+        return false;
+    }
+    while (len-- > 0) {
+        char c1 = ta[to++];
+        char c2 = pa[po++];
+        if (c1 == c2) {
+            continue;
+        }
+        if (ignoreCase) {
+            // If characters don't match but case may be ignored,
+            // try converting both characters to uppercase.
+            // If the results match, then the comparison scan should
+            // continue.
+            char u1 = Character.toUpperCase(c1);
+            char u2 = Character.toUpperCase(c2);
+            if (u1 == u2) {
+                continue;
+            }
+            // Unfortunately, conversion to uppercase does not work properly
+            // for the Georgian alphabet, which has strange rules about case
+            // conversion.  So we need to make one last check before
+            // exiting.
+            if (Character.toLowerCase(u1) == Character.toLowerCase(u2)) {
+                continue;
+            }
+        }
+        return false;
+    }
+    return true;
+}
+```
+
+#### regionMatches 和 equals 的区别
+
+> **相同点：**
+>
+> 1. 首先两个的参数都必须是 String 类型。（equals 虽然是 Object, 但是，只有为 String 类型时，才满足）
+>
+> **区别：**
+>
+> 1. regionMatches 可以只匹配两个字符串的一部分，而 equals 只能完整的比较字符串
+>
+> 2. regionMatches 可以不区分大小写的前提下，比较字符串的一部分。
+>
+>    ```java
+>    String surName = "CaoXiangbiao";
+>    String firstName = "Biao";
+>    System.out.println(surName.regionMatches(true, 8, firstName, 0, 4));
+>    ```
+
+#### equalsIgnoreCase 和 equals 的区别
+
+> 区别类似于 regionMatches 和 equals 的区别
+
+#### startsWith 和 endWith
+
+> startWith 当前字符串以什么开始
+>
+> endWith 当前字符串以什么结束

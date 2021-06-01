@@ -12,6 +12,16 @@
 >
 > getClasses 只会返回 public 修饰的 所有内部类。
 
+## `私有方法、构造器等的调用`==
+
+> 反射会破坏 封装，我们又知道在 Class 中的添加 ==declaring==的方法和不添加 ==declaring==的方法的区别，因此，在获取 私有方法、成员变量或者构造方法时，需要调用带有 declaring 的方法，例如
+>
+> ```
+> getDeclaredMethod
+> getDeclaredField
+> getDeclaredConstructors
+> ```
+
 ## `Declaring 和 不加 区别`
 
 > 记住，Declaring  无需 public 修饰，但是没有 Declaring  的方法一般只获取 public 修饰的类或方法
@@ -30,9 +40,16 @@
 
 > 使用给定的类装入器，返回与给定字符串名称的类或接口关联的类对象。给定类或接口的完全限定名(==使用与getName返回的格式相同的格式==)，此方法尝试定位、加载和链接类或接口。指定的类装入器用于装入类或接口。如果参数==loader==为空，则通过引导类装入器装入类。只有当initialize参数为true且未更早地初始化时，类才会被初始化。
 >
-> 如果name表示原语类型或void，则会尝试在未命名包中查找名称为name的用户定义类。因此，此方法不能用于获取表示基本类型或void的任何类对象。
+> `如果name表示原语类型或void，则会尝试在未命名包中查找名称为name的用户定义类。因此，此方法不能用于获取表示基本类型或void的任何类对象。`
 >
 > `如果name表示数组类，则加载数组类的组件类型，但未初始化。`
+>
+> ```java
+> Class<?> anInt = Class.forName("[I");
+> System.out.println(anInt.getName());// [I 表示Int 类型的数组，也就是 基本类型的数组也是可以的，但是基本类型就是不可以
+> Class<?> BInt = Class.forName("I"); // error 
+> Class<?> CInt = Class.forName("int"); // error 
+> ```
 >
 > 例如，在一个实例方法中，表达式:
 >
@@ -570,17 +587,19 @@ printName.invoke(null, "CaoBourne", 30);
 
 ## [java中Class对象详解和类名.class, class.forName(), getClass()区别](https://www.cnblogs.com/cunlau/p/3624878.html)
 
-> 1.类名.class      说明： JVM将使用类装载器, 将类装入内存(前提是:类还没有装入内存),`不做类的初始化工作.返回Class的对象 `
+> 1. 类名.class      说明： JVM将使用类装载器, 将类装入内存(前提是:类还没有装入内存),`不做类的初始化工作.返回Class的对象 `
 >
-> 2.Class.forName("类名字符串") （注：类名字符串是包名+类名）  说明：装入类,`并做类的静态初始化，返回Class的对象 `
+> 2. Class.forName("类名字符串") （注：类名字符串是包名+类名）  说明：装入类,`并做类的静态初始化，返回Class的对象 `
 >
-> 3.实例对象.getClass()  说明：对类进行静态初始化、非静态初始化；返回引用o运行时真正所指的对象(因为:子对象的引用可能会赋给父对象的引用变量中)所属的类的Class的对象 
+> 3. 实例对象.getClass()  说明：对类进行静态初始化、非静态初始化；返回引用o运行时真正所指的对象(因为:子对象的引用可能会赋给父对象的引用变量中)所属的类的Class的对象 
+>
+> 4. `forName 不可以获取基本类型和 void 类型的java.lang.Class 对象，但是 int.class 可以`
 >
 > ```java
 > public class Dog {
->  static {
->      System.out.println("dog ---静态的参数初始化---");
->  }
+> static {
+>   System.out.println("dog ---静态的参数初始化---");
+> }
 > }
 > Class<Dog> dogClass = Dog.class; // 这个不会执行静态代码，也就是不会初始化
 > Class<?> aClass = Class.forName("com.bourne.pack.Dog"); // 这个会执行 静态代码

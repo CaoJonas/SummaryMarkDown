@@ -1,5 +1,11 @@
 # Java Initialization
 
+## [Java中实例初始化方法()原理解析](https://blog.csdn.net/TomAndersen/article/details/104349311)
+
+## [JVM init和clinit的理解](https://blog.csdn.net/u012588160/article/details/100108895?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task) 
+
+父类静态成员变量、静态代码块-》子类静态成员变量、静态代码块-》父类非静态成员变量、非静态代码块-》父类构造函数-》子类非静态成员变量、非静态代码块-》子类构造函数
+
 ## Kid
 
 ```java
@@ -92,14 +98,14 @@ public static void main(String[] args) {
 }
 /*
 Person 静态代码块
-Person Kid2Kid 类
+Person Kid2Kid 类（静态成员变量）
 User 静态代码块
-User Kid2Kid 类
+User Kid2Kid 类（静态成员变量）
 Person 非静态代码块
-Person Kid1Kid 类
+Person Kid1Kid 类（非静态成员变量）
 person父类构造函数
 user 非静态代码块
-User Kid1Kid 类
+User Kid1Kid 类（非静态成员变量）
 子类构造函数
 */
 ```
@@ -191,7 +197,17 @@ Animal 构造函数Animal2
 
 > 可以看出静态成员和静态代码块只初始化一次（java 虚拟机加载类时，就会执行该代码），非静态可以初始化多次（每次 new 才会执行代码）
 
-## 自己类中定义自己的实例对象
+## ==自己类中定义自己的实例对象==
+
+> 这个还是要注意的，首先，如果再当前类中只能定义静态对象，如果定义非静态则会造成 死循环；第二，初始化当前静态成员变量； 只会进行非静态成员变量和非静态代码块初始化。而不会进行当前类中静态成员变量和代码块初始化，原因如下：
+
+```java
+第一步：在类加载过程的准备阶段，先对b进行系统的赋值，b = 0。
+第二步：在类加载过程的初始化阶段，执行<clinit>方法，那么先执行类变量的初始化（调用类成员变量和静态代码块）
+第三步：在第二步的时候，<clinit>正在执行，当执行到 “static Practice practice = new Practice();”，会去调用<init>方法（而init只会执行非静态成员变量和代码块，然后构造函数）
+第四步：<init>方法已经执行完了，那么就接下来执行<cinit>剩余的部分，先执行类的静态代码块：（此时的先后顺序依照代码编写的先后顺序）此时<cinit>方法就执行完成了。
+第五步：<clinit>和<init>方法都已经执行完成了，类已经加载完成，此时就是函数的调用了，JavaTest的函数入口是main()方法，因此会调用静态方法f1()：System.out.println("4"); 到此，整个程序就执行完成了。
+```
 
 > 一般在自己类中定义的成员变量一般为 静态成员变量， 如果按照下面定义, 就会出现死循环， 栈内存溢出
 >
@@ -203,36 +219,37 @@ Animal 构造函数Animal2
 > ```
 
 ```java
-public class SynChronizedClass {
-
-     private Integer id;
-     private String name;
-
-     public SynChronizedClass() {
-          System.out.println("构造方法");
-     }
-
-     public SynChronizedClass(Integer id, String name) {
-          this.id = id;
-          this.name = name;
-     }
-
-     static SynChronizedClass synChronizedClass1 = new SynChronizedClass(1000, "CaoBourne1");
-
-     @Override
-     public String toString() {
-          return "SynChronizedClass{" +
-               "id=" + id +
-               ", name='" + name + '\'' +
-               '}';
-     }
-
-     public static void main(String[] args){
-          System.out.println(synChronizedClass1);
-     }
+class Animal1 {
+    public Animal1(String name) {
+        System.out.println(name);
+    }
+}
+public class Practice {
+    static Practice practice = new Practice();
+    static {
+        System.out.println("静态代码1");
+    }
+    {
+        System.out.println("非静态代码2");
+    }
+    static Animal1 animal1 = new Animal1("静态成员变量");
+    Animal1 animal2 = new Animal1("非静态成员变量");
+    public Practice() {
+        System.out.println("Practice 构造函数");
+    }
+    public static void main(String... args) {
+        new Practice();
+    }
 }
 /*
-SynChronizedClass{id=1000, name='CaoBourne1'}
+非静态代码2
+非静态成员变量
+Practice 构造函数
+静态代码1
+静态成员变量
+非静态代码2
+非静态成员变量
+Practice 构造函数
 */
 ```
 
@@ -341,3 +358,44 @@ public class Person {
 
 }
 ```
+
+## 为什么调用（1)静态成员变量和静态方法会初始化所有静态成员变量和静态代码块，(2)调用常量却不会初始化静态成员变量和静态代码块
+
+(1). 调用静态成员和静态方法首先会调用 putField, setField, 和 invokestatic 字节码，就会发生类加载，在类加载初始化阶段，JVM会调用<cinit>方法，该方法就会初始化静态成员变量和执行静态代码块
+
+(2) 静态常量会在编译阶段加载到类的运行时常量池，而成员变量初始化和代码块的执行都会在类加载的时候和类加载之后
+
+## 经典 题目分析
+
+```java
+class SingleTon {
+    private static SingleTon singleTon = new SingleTon();
+    public static int count1;
+    public static int count2 = 0;
+    private SingleTon() {
+        count1++;
+        count2++;
+    }
+    public static SingleTon getInstance() {
+        return singleTon;
+    }
+}
+public class Test {
+    public static void main(String[] args) {
+        SingleTon singleTon = SingleTon.getInstance();
+        System.out.println("count1=" + singleTon.count1);
+        System.out.println("count2=" + singleTon.count2);
+    }
+    // count1=1
+	// count2=0
+}
+// 调用静态方法，首先会进行类加载，在准备阶段，初始化为 零值，在初始化singleTon静态成员变量的时候，<init>方法会执行，（只会初始化非静态成员变量和非静态代码块），init 初始化完成之后，会接着执行 cinit 的其他成员， count2 = 0; 又再次被初始化
+/*
+1:SingleTon singleTon = SingleTon.getInstance();调用了类的SingleTon调用了类的静态方法，触发类的初始化
+2:类加载的时候在准备过程中为类的静态变量分配内存并初始化默认值 singleton=null count1=0,count2=0
+3:类初始化化，为类的静态变量赋值和执行静态代码快。singleton赋值为new SingleTon()调用类的构造方法
+4:调用类的构造方法后count=1;count2=1
+5:继续为count1与count2赋值,此时count1没有赋值操作,所有count1为1,但是count2执行赋值操作就变为0
+*/
+```
+

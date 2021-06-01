@@ -1,14 +1,14 @@
-#### ﻿**1. java 命令行运行 java**
+## ﻿**1. java 命令行运行 java**
 
 ​	先编译 ：javac person.java（要加后缀） 生成字节码文件
 ​	再运行字节码文件 java person (不要加后缀) 
 
-#### **2. java 的跨平台特性** 
+## **2. java 的跨平台特性** 
 
 ​	首先编译 person .java 生成字节码文件（person.class）, 而 JVM 运行字节码文件 .class 文件
 ​	JVM 也是一个软件， 不同的系统平台JVM不同，但都可以实现标准的**.class** 字节码文件。(一次编译， 导出运行， Java程序 运行在JVM上， 而JVM对上 屏蔽了底层的操作系统差异）
 
-#### **3. 利用命令行编译 .java 文件 和 运行 .class 字节码文件**
+## **3. 利用命令行编译 .java 文件 和 运行 .class 字节码文件**
 
 ​		![在这里插入图片描述](https://img-blog.csdnimg.cn/20190327221454978.jpg)
 
@@ -41,8 +41,10 @@
 - 利用javap -c com.bourne.practicetoday.test（不加后缀）
 
    **-c                       对代码进行反汇编**
+   
+   **查看 字节码指令**
 
-#### 3-2 利用命令行编译 .java 文件 和 运行 .class 字节码文件*
+### 3-2 利用命令行编译 .java 文件 和 运行 .class 字节码文件*
 
 ![](java_ack_imgs/NeteaseSample.jpg)
 
@@ -60,18 +62,22 @@
 - java com.bourne.practice.pojo.Netease
 ```
 
+### 3-3 获取 .class 的字节码（类文件）
 
+> javap -verbose jvm/A
 
-#### **4. 如何覆写 equals 方法 和 hashcode 方法**
+### [IDEA中通过hsdis查看Java代码的汇编指令](https://blog.csdn.net/dataiyangu/article/details/104990220)
+
+## 4. 如何覆写 equals 方法 和 hashcode 方法**
 
 ​	https://blog.csdn.net/fulfillmydream/article/details/16858473
 
-#### 5.Java中静态(static)成员何时才会初始化
+## 5.Java中静态(static)成员何时才会初始化
 
 [==博客园==](		<https://blog.csdn.net/jisuanji198509/article/details/81260487>			)     https://blog.csdn.net/jisuanji198509/article/details/81260487
 [==java类加载时机与过程==](https://www.cnblogs.com/javaee6/p/3714716.html)
 
-#### 6.基本数据类型 & 引用类型
+## 6.基本数据类型 & 引用类型
 
 1.1 基本概念
 
@@ -90,7 +96,7 @@
 | “==”和“!=”是在比较值                   | `“==”`和`“!=”`是在比较两个引用是否相同                       |
 | 使用时需要赋具体值，判断时使用`==`号   | 使用时可以赋值`null`，判断时使用`equals`方法                 |
 
-###### 1.2 基本数据类型 和 引用数据类型 传递区别
+### 1.2 基本数据类型 和 引用数据类型 传递区别
 
 程序设计语言中有关参数传递给方法的两个专业术语是：
 
@@ -99,7 +105,7 @@
 
 在`Java`中 **不存在按引用调用， 都是按值 传递， 基本数据类型， 直接传值， 而 引用类型传递的也是值， 只不过时引用类型指向的地址**，也就是说，假如方法传递的是一个引用数据类型，那么可以修改 **引用所指向的对象的属性**，但不能 **让引用指向其它的对象**。
 
-#### 7 StringBuffer 和 StringBuilder tostirng
+## 7 StringBuffer 和 StringBuilder tostirng
 
 StringBuffer.toString() 以及 对应的字符串构造函数
 
@@ -183,7 +189,7 @@ public String(char value[], int offset, int count) {
 }
 ```
 
-#### new String()
+## new String()
 
    String 提供了一个保护类型的构造方法。目前不支持使用false，只使用true。那么可以断定，加入这个share的只是为了区分于String(char[] value)方法，不加这个参数就没办法定义这个函数，只有参数不同才能进行重载。那么，第二个区别就是具体的方法实现不同。这里直接将value的引用赋值给String的value。那么也就是说，这个方法构造出来的String和参数传过来的char[] value共享同一个数组。作用的话，肯定是性能好一点。假如把该方法改为public，而不是protected的话，对外开放访问，就可以通过修改数组的引用来破坏String的不可变性。
 
@@ -198,3 +204,7 @@ public String(char value[]) {
      	//用到Arrays的copyOf方法将value中的内容逐一复制到String当中
 }
 ```
+
+## 8.  [String字符串的==、equals方法以及对象的==、equals方法的区别](https://blog.csdn.net/zm13007310400/article/details/78300547)
+
+## [来看看String类和常量池内存分析以及8种基本类型和常量池例子](https://blog.csdn.net/qq_34115899/article/details/86583262)

@@ -264,3 +264,7 @@
   ```
 
 记住： 如果 是 类的操作， 一定会 装箱， 如果 有基本数据类型 例如 == 都会拆箱
+
+#### 5 [String字符串的==、equals方法以及对象的==、equals方法的区别](https://blog.csdn.net/zm13007310400/article/details/78300547)
+
+[来看看String类和常量池内存分析以及8种基本类型和常量池例子](https://blog.csdn.net/qq_34115899/article/details/86583262)
