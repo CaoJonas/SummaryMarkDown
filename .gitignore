@@ -43,21 +43,21 @@ effective_java_imgs
 
 #java_ack
 
-abstract_interface.md
-equals 和 =='' 区别.md
-final_finally_finalize.md
-Java 学习.md
-java_ack_imgs
-Java_Initialization.md
-Java_interview_test.md
-Java_websites.md
-Static_修饰符.md
-Synchronized.md
-try_throw_return.md
-内部类.md
-异常.md
-泛型.md
-自增和自减.md
+# abstract_interface.md
+# equals 和 =='' 区别.md
+# final_finally_finalize.md
+# Java 学习.md
+# java_ack_imgs
+# Java_Initialization.md
+# Java_interview_test.md
+# Java_websites.md
+# Static_修饰符.md
+# Synchronized.md
+# try_throw_return.md
+# 内部类.md
+# 异常.md
+# 泛型.md
+# 自增和自减.md
 
 # java_source
 
